@@ -35,10 +35,10 @@ import {
  * Main diagram renderer class
  */
 export class Renderer {
-  private diagram: DiagramDefinition;
-  private options: Required<RenderOptions>;
-  private computedNodes: ComputedNode[];
-  private nodeMap: Map<string, ComputedNode>;
+  protected diagram: DiagramDefinition;
+  protected options: Required<RenderOptions>;
+  protected computedNodes: ComputedNode[];
+  protected nodeMap: Map<string, ComputedNode>;
 
   constructor(diagram: DiagramDefinition, options: RenderOptions = {}) {
     this.diagram = diagram;
@@ -176,7 +176,7 @@ export class Renderer {
   <polygon class="resize-handle"
     points="${width - padding},${height - padding - handleSize} ${width - padding},${height - padding} ${width - padding - handleSize},${height - padding}"
     fill="#CCCCCC" stroke="#AAAAAA" stroke-width="0.5" style="cursor: nwse-resize;"/>
-</g>`;
+</g><!-- /boundary-box -->`;
   }
 
   /**
@@ -791,7 +791,7 @@ ${gradients.join('\n')}
   /**
    * Get embedded CSS (viewer only)
    */
-  private getCss(): string {
+  protected getCss(): string {
     return `.gospelo-diagram {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -807,9 +807,9 @@ ${gradients.join('\n')}
   }
 
   /**
-   * Get JavaScript for viewer functionality (resize only, no editor)
+   * Get JavaScript for viewer functionality (resize only)
    */
-  private getViewerScript(): string {
+  protected getViewerScript(): string {
     return `
 (function() {
   var svg = document.querySelector('.gospelo-svg');
@@ -1037,7 +1037,7 @@ ${gradients.join('\n')}
   /**
    * Escape HTML entities
    */
-  private escapeHtml(text: string): string {
+  protected escapeHtml(text: string): string {
     return text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')

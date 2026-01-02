@@ -11,7 +11,8 @@
   "files": [
     "dist",
     "bin",
-    "src"
+    "src",
+    "!src/icons"
   ],
   "scripts": {
     "build": "tsc",

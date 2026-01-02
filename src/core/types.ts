@@ -1,9 +1,102 @@
 /**
- * Core type definitions for gospelo-diagramjs
- * Based on gospelo-diagram Python models
+ * Core type definitions for gospelo-diagrams
+ * gospelo™ Specification 1.0
  */
 
+// ============================================================================
+// gospelo 1.0 Root Structure
+// ============================================================================
+
+/**
+ * gospelo specification version
+ */
+export const GOSPELO_VERSION = '1.0';
+
+/**
+ * Asset metadata for gospelo document
+ */
+export interface Asset {
+  /** gospelo specification version (required) */
+  version: string;
+  /** Tool that generated this document */
+  generator?: string;
+  /** Copyright message for content attribution */
+  copyright?: string;
+  /** Minimum gospelo version required */
+  minVersion?: string;
+  /** Extension-specific data */
+  extensions?: Record<string, unknown>;
+  /** Application-specific data */
+  extras?: unknown;
+}
+
+/**
+ * Document type identifier
+ */
+export type DocumentType = 'diagram' | 'flowchart' | 'sequence';
+
+/**
+ * Base document interface (common properties for all document types)
+ */
+export interface BaseDocument {
+  /** Document type identifier */
+  type: DocumentType;
+  /** Document title */
+  title?: string;
+  /** Document subtitle */
+  subtitle?: string;
+  /** Background configuration */
+  background?: Background;
+  /** Custom metadata */
+  metadata?: Record<string, unknown>;
+  /** Extension-specific data */
+  extensions?: Record<string, unknown>;
+  /** Application-specific data */
+  extras?: unknown;
+}
+
+/**
+ * Diagram document (type: "diagram")
+ */
+export interface DiagramDocument extends BaseDocument {
+  type: 'diagram';
+  /** Array of node definitions */
+  nodes: Node[];
+  /** Array of connection definitions */
+  connections?: Connection[];
+  /** Named color definitions */
+  colors?: ColorMap;
+  /** Rendering hints */
+  render?: RenderOptions;
+}
+
+/**
+ * Union type for all document types
+ */
+export type GospeloDocument = DiagramDocument; // | FlowchartDocument | SequenceDocument
+
+/**
+ * gospelo 1.0 root document structure
+ */
+export interface GospeloRoot {
+  /** Asset metadata (required) */
+  asset: Asset;
+  /** Names of extensions used in this document */
+  extensionsUsed?: string[];
+  /** Names of extensions required to load this document */
+  extensionsRequired?: string[];
+  /** Array of document definitions */
+  documents?: GospeloDocument[];
+  /** Extension-specific data */
+  extensions?: Record<string, unknown>;
+  /** Application-specific data */
+  extras?: unknown;
+}
+
+// ============================================================================
 // Node types
+// ============================================================================
+
 export type NodeType =
   | 'icon'
   | 'group'

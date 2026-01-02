@@ -33,3 +33,6 @@ development/
 
 # Claude files
 .claude/
+
+# Editor CLI (development only)
+bin/editor-cli.ts

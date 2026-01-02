@@ -1,6 +1,6 @@
 /**
- * JSON Parser for diagram definitions
- * Converts JSON input to DiagramDefinition objects
+ * JSON Parser for gospelo documents
+ * Supports both gospelo 1.0 format and legacy diagram format
  *
  * Note: No external dependencies - works in Web Claude environment
  */
@@ -19,6 +19,7 @@ import {
   BackgroundType,
   GradientDirection,
   DEFAULT_COLORS,
+  Asset,
 } from './types';
 
 /**
@@ -71,11 +72,46 @@ interface RawConnectionInput {
 }
 
 /**
+ * Check if input is gospelo 1.0 format (has asset and documents)
+ */
+function isGospeloFormat(raw: unknown): raw is { asset: Asset; documents: unknown[] } {
+  return (
+    typeof raw === 'object' &&
+    raw !== null &&
+    'asset' in raw &&
+    'documents' in raw &&
+    Array.isArray((raw as { documents: unknown[] }).documents)
+  );
+}
+
+/**
  * Parse JSON object to DiagramDefinition
+ * Supports both gospelo 1.0 format and legacy format
  */
 export function parseDiagram(input: RawDiagramInput | string): DiagramDefinition {
-  const raw: RawDiagramInput = typeof input === 'string' ? JSON.parse(input) : input;
+  const raw = typeof input === 'string' ? JSON.parse(input) : input;
 
+  // gospelo 1.0 format: extract first diagram document
+  if (isGospeloFormat(raw)) {
+    const docs = raw.documents;
+    if (docs.length === 0) {
+      throw new Error('gospelo document must have at least one document in documents array');
+    }
+    const firstDoc = docs[0] as RawDiagramInput & { type?: string };
+    if (firstDoc.type && firstDoc.type !== 'diagram') {
+      throw new Error(`Unsupported document type: ${firstDoc.type}. Only 'diagram' is currently supported.`);
+    }
+    return parseLegacyDiagram(firstDoc);
+  }
+
+  // Legacy format: direct diagram definition
+  return parseLegacyDiagram(raw as RawDiagramInput);
+}
+
+/**
+ * Parse legacy diagram format
+ */
+function parseLegacyDiagram(raw: RawDiagramInput): DiagramDefinition {
   if (!raw.title) {
     throw new Error('Diagram must have a title');
   }

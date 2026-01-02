@@ -358,15 +358,31 @@ if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
 
 const options = parseOptions(args);
 
+// Helper to detect gospelo 1.0 format
+function isGospeloFormat(raw: any): boolean {
+  return raw && typeof raw === 'object' && 'asset' in raw && 'documents' in raw && Array.isArray(raw.documents);
+}
+
+// Helper to extract render options from diagram (supports both formats)
+function extractRenderOptions(diagram: any): { width?: number; height?: number } {
+  // gospelo 1.0 format: render is inside documents[0]
+  if (isGospeloFormat(diagram)) {
+    return diagram.documents?.[0]?.render || {};
+  }
+  // Legacy format: render is at root level
+  return diagram.render || {};
+}
+
 // Helper to get effective render options from diagram + CLI options
 function getEffectiveRenderOptions(diagram: any): RenderOptions {
+  const diagramRender = extractRenderOptions(diagram);
   // Priority: CLI options > diagram.render > defaults
   const width = options.widthSpecified
     ? options.width!
-    : (diagram.render?.width ?? DEFAULT_WIDTH);
+    : (diagramRender.width ?? DEFAULT_WIDTH);
   const height = options.heightSpecified
     ? options.height!
-    : (diagram.render?.height ?? DEFAULT_HEIGHT);
+    : (diagramRender.height ?? DEFAULT_HEIGHT);
   return { width, height };
 }
 
