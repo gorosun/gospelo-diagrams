@@ -3,48 +3,48 @@
 ## Flag-style Commands (Recommended for Agent Skills)
 
 ```bash
-# ダイアグラム構造を表示
+# View diagram structure
 gospelo-diagrams --open --diagram <file.json>
 
-# HTML/SVG出力
+# HTML/SVG output
 gospelo-diagrams --output html --diagram <file.json>
 gospelo-diagrams --output svg --diagram <file.json>
 
-# 出力先ディレクトリを指定
+# Specify output directory
 gospelo-diagrams --output html --diagram <file.json> --output-dir ./output
 
-# ノード追加（基準ノードの上/下に配置）
+# Add node (positioned above/below reference node)
 gospelo-diagrams --insert-above <ref-node-id> --node '<json>' --diagram <file.json>
 gospelo-diagrams --insert-below <ref-node-id> --node '<json>' --diagram <file.json>
 
-# ノード更新
+# Update node
 gospelo-diagrams --update-node <node-id> --node '<json>' --diagram <file.json>
 
-# ノード削除
+# Remove node
 gospelo-diagrams --remove-node <node-id> --diagram <file.json>
 
-# ノード整列（Y座標を基準ノードに揃える）
+# Align nodes (align Y-coordinates to reference node)
 gospelo-diagrams --align-top <ref-node-id> --nodes '<id1,id2,...>' --diagram <file.json>
 
-# ノード整列（X座標を基準ノードに揃える）
+# Align nodes (align X-coordinates to reference node)
 gospelo-diagrams --align-left <ref-node-id> --nodes '<id1,id2,...>' --diagram <file.json>
 ```
 
 ## Traditional Commands
 
 ```bash
-# レンダリング
+# Rendering
 bun bin/cli.ts render <input.json> <output.html>
 bun bin/cli.ts svg <input.json> <output.svg>
 bun bin/cli.ts enrich <input.json> <output.json> --pretty
 
-# メタデータ
+# Metadata
 bun bin/cli.ts meta <input.json> --pretty
 
-# eval - 最も柔軟（JS式を実行）
+# eval - Most flexible (executes JS expression)
 bun bin/cli.ts eval <input.json> '<expression>' [output.json]
 
-# 個別コマンド
+# Individual commands
 bun bin/cli.ts add-node <input.json> '<node-json>' [output.json]
 bun bin/cli.ts remove-node <input.json> <node-id> [output.json]
 bun bin/cli.ts move-node <input.json> <node-id> <x> <y> [output.json]

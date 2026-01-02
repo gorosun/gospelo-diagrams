@@ -1,51 +1,51 @@
 # DiagramBuilder API Reference
 
-`eval`コマンドで使用可能なメソッド。`b`はDiagramBuilderインスタンスです。
+Methods available in the `eval` command. `b` is a DiagramBuilder instance.
 
 ## Node Operations
 
 | Method | Description |
 | ------ | ----------- |
-| `addNode({id, icon, label, position, ...})` | ノードを追加 |
-| `insertAbove(refNodeId, nodeInput, offsetY?)` | 基準ノードの上にノードを追加 (デフォルト: Y-100) |
-| `insertBelow(refNodeId, nodeInput, offsetY?)` | 基準ノードの下にノードを追加 (デフォルト: Y+100) |
-| `insertLeft(refNodeId, nodeInput, offsetX?)` | 基準ノードの左にノードを追加 (デフォルト: X-150) |
-| `insertRight(refNodeId, nodeInput, offsetX?)` | 基準ノードの右にノードを追加 (デフォルト: X+150) |
-| `removeNode(id)` | ノードと関連接続を削除 |
-| `updateNode(id, {label, icon, ...})` | ノードを更新 |
-| `moveNode(id, [x, y])` | ノードを移動 |
-| `setNodeLabel(id, label, sublabel?)` | ラベルを変更 |
-| `setNodeIcon(id, icon)` | アイコンを変更 |
+| `addNode({id, icon, label, position, ...})` | Add a node |
+| `insertAbove(refNodeId, nodeInput, offsetY?)` | Add node above reference node (default: Y-100) |
+| `insertBelow(refNodeId, nodeInput, offsetY?)` | Add node below reference node (default: Y+100) |
+| `insertLeft(refNodeId, nodeInput, offsetX?)` | Add node to the left of reference node (default: X-150) |
+| `insertRight(refNodeId, nodeInput, offsetX?)` | Add node to the right of reference node (default: X+150) |
+| `removeNode(id)` | Remove node and related connections |
+| `updateNode(id, {label, icon, ...})` | Update node |
+| `moveNode(id, [x, y])` | Move node |
+| `setNodeLabel(id, label, sublabel?)` | Change label |
+| `setNodeIcon(id, icon)` | Change icon |
 
 ## Alignment Operations
 
 | Method | Description |
 | ------ | ----------- |
-| `alignTop(refNodeId, nodeIds[])` | 複数ノードのY座標を基準ノードに揃える |
-| `alignLeft(refNodeId, nodeIds[])` | 複数ノードのX座標を基準ノードに揃える |
-| `distributeHorizontally(nodeIds[], spacing?)` | ノードを等間隔に水平配置 (デフォルト: 150px) |
-| `distributeVertically(nodeIds[], spacing?)` | ノードを等間隔に垂直配置 (デフォルト: 100px) |
+| `alignTop(refNodeId, nodeIds[])` | Align Y-coordinates of multiple nodes to reference node |
+| `alignLeft(refNodeId, nodeIds[])` | Align X-coordinates of multiple nodes to reference node |
+| `distributeHorizontally(nodeIds[], spacing?)` | Distribute nodes horizontally with equal spacing (default: 150px) |
+| `distributeVertically(nodeIds[], spacing?)` | Distribute nodes vertically with equal spacing (default: 100px) |
 
 ## Connection Operations
 
 | Method | Description |
 | ------ | ----------- |
-| `addConnection({from, to, type?, color?})` | 接続を追加 |
-| `removeConnection(from, to)` | 接続を削除 |
-| `updateConnection(from, to, {...})` | 接続を更新 |
+| `addConnection({from, to, type?, color?})` | Add connection |
+| `removeConnection(from, to)` | Remove connection |
+| `updateConnection(from, to, {...})` | Update connection |
 
 ## Group/Composite Child Nodes
 
-グループ (`type: "group"`) やコンポジット (`type: "composite"`) の子ノードは、基本的に `layout` プロパティに従って自動配置されます。
+Child nodes of groups (`type: "group"`) or composites (`type: "composite"`) are automatically positioned based on the `layout` property.
 
 | Layout | Description |
 | ------ | ----------- |
-| `horizontal` | 子ノードを横並びに自動配置（デフォルト） |
-| `vertical` | 子ノードを縦並びに自動配置 |
+| `horizontal` | Auto-arrange child nodes horizontally (default) |
+| `vertical` | Auto-arrange child nodes vertically |
 
-### 子ノードの相対座標指定
+### Relative Positioning of Child Nodes
 
-子ノードに `position` を指定すると、親ノードからの相対座標で配置できます。
+Specify `position` on child nodes to position them relative to the parent node.
 
 ```json
 {
@@ -60,41 +60,41 @@
 }
 ```
 
-- `position: [0, 0]` = 親グループの左上角
-- 自動配置と手動配置を混在させることも可能
+- `position: [0, 0]` = top-left corner of parent group
+- You can mix auto-layout and manual positioning
 
 ## Metadata Operations
 
 | Method | Description |
 | ------ | ----------- |
-| `setTitle(title)` | タイトルを設定 |
-| `setSubtitle(subtitle)` | サブタイトルを設定 |
-| `setBackground({type, ...})` | 背景を設定 |
+| `setTitle(title)` | Set title |
+| `setSubtitle(subtitle)` | Set subtitle |
+| `setBackground({type, ...})` | Set background |
 
 ## Examples
 
 ```bash
-# ノードを追加
+# Add a node
 bun bin/cli.ts eval diagram.json 'b.addNode({id:"lambda",icon:"aws:lambda",label:"Lambda",position:[400,300]})'
 
-# 基準ノードの右にノードを追加
+# Add node to the right of reference node
 bun bin/cli.ts eval diagram.json 'b.insertRight("api",{id:"lambda",icon:"aws:lambda",label:"Lambda"})'
 
-# ノードを移動
+# Move node
 bun bin/cli.ts eval diagram.json 'b.moveNode("lambda",[500,400])'
 
-# 複数操作をチェーン
+# Chain multiple operations
 bun bin/cli.ts eval diagram.json 'b.addNode({id:"a",icon:"aws:s3"}).addConnection({from:"api",to:"a"})'
 
-# ラベル変更
+# Change label
 bun bin/cli.ts eval diagram.json 'b.setNodeLabel("lambda","New Label","New Sublabel")'
 
-# ノードのY座標を揃える
+# Align Y-coordinates of nodes
 bun bin/cli.ts eval diagram.json 'b.alignTop("api",["lambda","db","s3"])'
 
-# ノードのX座標を揃える
+# Align X-coordinates of nodes
 bun bin/cli.ts eval diagram.json 'b.alignLeft("api",["waf","cloudfront"])'
 
-# ノードを等間隔に水平配置
+# Distribute nodes horizontally with equal spacing
 bun bin/cli.ts eval diagram.json 'b.distributeHorizontally(["api","lambda","db"],200)'
 ```

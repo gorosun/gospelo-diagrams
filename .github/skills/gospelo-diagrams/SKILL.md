@@ -6,7 +6,19 @@ allowed-tools: Read, Bash(bun:*), Bash(gospelo-diagrams:*)
 
 # System Diagram Generator Skill
 
-JSON定義からシステムアーキテクチャ図を生成・編集するスキルです。AWS、Azure、GCP、その他テックスタックのアイコンをサポートしています。
+Generate and edit system architecture diagrams from JSON definitions. Supports AWS, Azure, GCP, and other tech stack icons.
+
+## Prerequisites
+
+Install Bun runtime and gospelo-diagrams:
+
+```bash
+# Install Bun
+npm install -g bun
+
+# Install gospelo-diagrams
+npm install -g gospelo-diagrams
+```
 
 ## When to Use
 
@@ -17,67 +29,119 @@ Activate this skill when the user asks to:
 - Generate infrastructure visualization
 - Create AWS/Azure/GCP architecture diagrams
 - Export diagram to HTML, SVG, or enriched JSON
-- Search for available icons (e.g., "Lambdaのアイコン名は？", "S3関連のアイコンを探して")
+- Search for available icons (e.g., "What's the icon name for Lambda?", "Find S3-related icons")
 
 ## Output Commands
 
 ### For Web Claude (Artifact Display)
 
-Web版Claudeでは`preview`コマンドでBase64埋め込みHTMLを生成し、Artifactとして表示:
+Use the `preview` command to generate Base64-embedded HTML for Artifact display:
 
 ```bash
-# プレビューHTML生成（Base64埋め込み、Confidentialバッジ付き）
+# Generate preview HTML (Base64 embedded, with Confidential badge)
 bun bin/cli.ts preview diagram.json
 # -> diagram_preview.html
 ```
 
 ### For Claude Code (Local Editing)
 
-Claude Codeでは`editor`コマンドで編集可能なHTMLを生成:
+Use the `editor` command to generate editable HTML:
 
 ```bash
-# 編集可能HTML生成
+# Generate editable HTML
 bun bin/cli.ts editor diagram.json
 # -> diagram_editor.html
 ```
 
-出力後、ユーザーに確認メッセージを表示:
-- 既にブラウザで開いている場合: タブをリロード
-- 初回の場合: `open diagram_editor.html` を実行
+After output, prompt the user:
+- If already open in browser: Reload the tab
+- If first time: Run `open diagram_editor.html`
+
+## Workflow: Creating a New Diagram
+
+Follow these steps when creating a diagram:
+
+### Step 1: Search for Icon IDs
+
+**Important**: Do not guess icon names. Always search to confirm the exact ID.
+
+```bash
+# Search for icon IDs of services you want to use
+gospelo-diagrams --icon-search lambda
+gospelo-diagrams --icon-search "api gateway"
+gospelo-diagrams --icon-search dynamodb
+```
+
+Example search results:
+```
+📦 AWS (1 matches)
+   aws:lambda - Lambda [Compute]
+
+📦 AWS (1 matches)
+   aws:api_gateway - Api Gateway [App-Integration]
+```
+
+**Common mistakes**:
+- ❌ `aws:api-gateway` (hyphen)
+- ✅ `aws:api_gateway` (underscore)
+
+### Step 2: Create JSON Definition
+
+Use the icon IDs confirmed from search:
+
+```json
+{
+  "title": "My Architecture",
+  "nodes": [
+    {"id": "api", "icon": "aws:api_gateway", "label": "API Gateway", "position": [200, 150]},
+    {"id": "lambda", "icon": "aws:lambda", "label": "Lambda", "position": [400, 150]}
+  ],
+  "connections": [
+    {"from": "api", "to": "lambda"}
+  ]
+}
+```
+
+### Step 3: Generate Preview
+
+```bash
+bun bin/cli.ts preview diagram.json
+open diagram_preview.html
+```
 
 ## Quick Start
 
 ```bash
-# ダイアグラムの構造を確認（editorをブラウザで開く）
+# View diagram structure (opens editor in browser)
 gospelo-diagrams --open --diagram system.json
 
-# HTML出力
+# HTML output
 gospelo-diagrams --output html --diagram system.json  # -> _editor.html
 bun bin/cli.ts preview system.json                    # -> _preview.html
 gospelo-diagrams --output svg --diagram system.json   # -> .svg
 
-# ノード追加（基準ノードの下に配置）
+# Add node (positioned below reference node)
 gospelo-diagrams --insert-below lambda --node '{"id":"db","icon":"aws:dynamodb","label":"DynamoDB"}' --diagram system.json
 
-# ノード更新
+# Update node
 gospelo-diagrams --update-node lambda --node '{"label":"Updated Lambda","sublabel":"Python 3.12"}' --diagram system.json
 
-# ノード削除
+# Remove node
 gospelo-diagrams --remove-node old_node --diagram system.json
 ```
 
 ## Eval Command (Advanced)
 
-最も柔軟な方法。`b` はDiagramBuilderインスタンスです。
+The most flexible method. `b` is a DiagramBuilder instance.
 
 ```bash
-# ノードを追加
+# Add a node
 bun bin/cli.ts eval diagram.json 'b.addNode({id:"lambda",icon:"aws:lambda",label:"Lambda",position:[400,300]})'
 
-# 基準ノードの右にノードを追加
+# Add node to the right of reference node
 bun bin/cli.ts eval diagram.json 'b.insertRight("api",{id:"lambda",icon:"aws:lambda",label:"Lambda"})'
 
-# 複数操作をチェーン
+# Chain multiple operations
 bun bin/cli.ts eval diagram.json 'b.addNode({...}).addConnection({from:"a",to:"b"})'
 ```
 
@@ -108,42 +172,42 @@ bun bin/cli.ts eval diagram.json 'b.addNode({...}).addConnection({from:"a",to:"b
 ## Icon Catalog Commands
 
 ```bash
-# アイコン検索（全プロバイダーから）
+# Search icons (across all providers)
 gospelo-diagrams --icon-search lambda
-gospelo-diagrams --icon-search "cloud function"  # AND検索
+gospelo-diagrams --icon-search "cloud function"  # AND search
 
-# カタログHTMLのパスを表示
+# Display catalog HTML paths
 gospelo-diagrams --icon-catalog
 
-# 特定プロバイダーのみ
+# Specific provider only
 gospelo-diagrams --icon-catalog aws
 
-# ブラウザで開く
+# Open in browser
 gospelo-diagrams --icon-catalog --open
 ```
 
 ## AI Response Guidelines
 
-ダイアグラム生成後、ユーザーに編集の機会を提供する:
+Provide editing opportunities after generating a diagram:
 
-1. **プレビュー生成後**: Artifactで表示し、ユーザーに確認を促す
-   - 「ダイアグラムを作成しました。どこか編集しますか？」
-   - 「プレビューを生成しました。ノードの追加・削除・移動などご希望があればお知らせください。」
+1. **After preview generation**: Display in Artifact and prompt the user
+   - "I've created the diagram. Would you like to edit anything?"
+   - "Preview generated. Let me know if you'd like to add, remove, or move any nodes."
 
-2. **編集のワークフロー**:
-   - ユーザーの編集リクエストを受ける
-   - evalコマンドまたはフラグスタイルコマンドでJSONを更新
-   - 再度previewを生成してArtifactで表示
-   - 「更新しました。他に変更はありますか？」
+2. **Editing workflow**:
+   - Receive user's edit request
+   - Update JSON using eval command or flag-style commands
+   - Regenerate preview and display in Artifact
+   - "Updated. Any other changes?"
 
-3. **編集完了後**:
-   - ユーザーが満足したら、最終版のpreview HTMLを提供
-   - 必要に応じてダウンロード方法を案内
+3. **After editing is complete**:
+   - Once user is satisfied, provide final preview HTML
+   - Guide on download method if needed
 
 ## References
 
-詳細なコマンドリファレンスは `references/` ディレクトリを参照:
+See `references/` directory for detailed command references:
 
-- `references/cli-reference.md` - 全CLIコマンド一覧
-- `references/builder-api.md` - DiagramBuilder APIリファレンス
-- `references/schema.md` - JSON Schema詳細
+- `references/cli-reference.md` - Full CLI command reference
+- `references/builder-api.md` - DiagramBuilder API reference
+- `references/schema.md` - JSON Schema details

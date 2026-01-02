@@ -30,12 +30,12 @@
 
 ### Node Types
 
-- `icon` (default) - アイコンノード
-- `group` - グループ（子ノードを含む）
-- `composite` - 複合ノード（複数アイコン）
-- `text_box` - テキストボックス
-- `label` - ラベル（枠なし）
-- `person` - 人物アイコン
+- `icon` (default) - Icon node
+- `group` - Group (contains child nodes)
+- `composite` - Composite node (multiple icons)
+- `text_box` - Text box
+- `label` - Label (no border)
+- `person` - Person icon
 
 ## Connection Schema
 
@@ -52,9 +52,9 @@
 
 ### Connection Types
 
-- `data` - データフロー
-- `auth` - 認証フロー
-- `flow` - 一般的なフロー
+- `data` - Data flow
+- `auth` - Authentication flow
+- `flow` - General flow
 
 ## Supported Icon Providers
 
@@ -68,12 +68,12 @@
 ## Background Types
 
 ```json
-// 白背景
+// White background
 {"type": "white"}
 
-// 単色背景
+// Solid color background
 {"type": "solid", "color": "#f0f0f0"}
 
-// グラデーション背景
+// Gradient background
 {"type": "gradient", "startColor": "#fff", "endColor": "#eee", "direction": "south"}
 ```
