@@ -1,0 +1,241 @@
+/**
+ * Core type definitions for gospelo-diagramjs
+ * Based on gospelo-diagram Python models
+ */
+
+// Node types
+export type NodeType =
+  | 'icon'
+  | 'group'
+  | 'composite'
+  | 'text_box'
+  | 'label'      // Simple text label without border
+  | 'person'
+  | 'person_pc_mobile'
+  | 'pc_mobile'
+  | 'pc';
+
+// Connection types
+export type ConnectionType = 'data' | 'auth' | 'flow';
+
+// Connection line styles
+export type ConnectionStyle = 'orthogonal' | 'curved' | 'solid' | 'dashed' | 'dotted';
+
+// Anchor side for connections
+export type AnchorSide = 'top' | 'bottom' | 'left' | 'right';
+
+// Label position for groups
+export type LabelPosition = 'top-center' | 'top-left' | 'inside-top-left';
+
+// Layout direction
+export type LayoutDirection = 'horizontal' | 'vertical';
+
+// Background types
+export type BackgroundType = 'white' | 'solid' | 'gradient';
+
+// Gradient direction
+export type GradientDirection = 'south' | 'east' | 'north' | 'west';
+
+/**
+ * Background configuration
+ */
+export interface Background {
+  type: BackgroundType;
+  startColor?: string;
+  endColor?: string;
+  direction?: GradientDirection;
+  color?: string; // for solid type
+}
+
+/**
+ * Icon reference within composite node
+ */
+export interface IconRef {
+  id: string;
+  icon: string;
+  label?: string;
+}
+
+/**
+ * Position tuple
+ */
+export type Position = [number, number];
+
+/**
+ * Size tuple
+ */
+export type Size = [number, number];
+
+/**
+ * Node definition
+ */
+export interface Node {
+  id: string;
+  type?: NodeType;
+  icon?: string;
+  label?: string;
+  sublabel?: string;
+  position?: Position;
+  size?: Size;
+  borderColor?: string;
+  layout?: LayoutDirection;
+  labelPosition?: LabelPosition;
+  groupIcon?: string;
+  children?: Node[];
+  icons?: IconRef[]; // for composite type
+  /** 親ノードID（グループの子ノードの場合に必須） */
+  parentId?: string;
+}
+
+/**
+ * Connection between nodes
+ */
+export interface Connection {
+  from: string;
+  to: string;
+  type?: ConnectionType;
+  width?: number;
+  color?: string;
+  style?: ConnectionStyle;
+  bidirectional?: boolean;
+  label?: string;
+  fromSide?: AnchorSide;  // 出口辺（省略時は自動決定）
+  toSide?: AnchorSide;    // 入口辺（省略時は自動決定）
+}
+
+/**
+ * Color definitions (preset names to hex codes)
+ */
+export interface ColorMap {
+  [key: string]: string;
+}
+
+/**
+ * Complete diagram definition
+ */
+export interface DiagramDefinition {
+  title: string;
+  subtitle?: string;
+  background?: Background;
+  colors?: ColorMap;
+  nodes: Node[];
+  connections?: Connection[];
+}
+
+/**
+ * Bounding box for connection anchors
+ * アイコンノードの場合はアイコン部分のみ、グループの場合は枠全体
+ */
+export interface BoundingBox {
+  left: number;    // 左端X座標
+  top: number;     // 上端Y座標
+  right: number;   // 右端X座標
+  bottom: number;  // 下端Y座標
+  centerX: number; // 中心X座標
+  centerY: number; // 中心Y座標
+  width: number;   // 幅
+  height: number;  // 高さ
+}
+
+/**
+ * Computed node properties after layout calculation
+ */
+export interface ComputedNode extends Node {
+  computedX: number;
+  computedY: number;
+  computedWidth: number;
+  computedHeight: number;
+  /** 接続用の境界ボックス（絶対座標） */
+  bounds?: BoundingBox;
+}
+
+/**
+ * Render options
+ */
+export interface RenderOptions {
+  width?: number;
+  height?: number;
+  iconSize?: number;
+  fontSize?: number;
+  embedCss?: boolean;
+  externalIcons?: boolean;
+}
+
+/**
+ * Default color presets (AWS colors)
+ */
+export const DEFAULT_COLORS: ColorMap = {
+  blue: '#0073BB',
+  orange: '#FF9900',
+  dark: '#232F3E',
+  gray: '#666666',
+};
+
+/**
+ * Default render options
+ */
+export const DEFAULT_RENDER_OPTIONS: Required<RenderOptions> = {
+  width: 1200,
+  height: 800,
+  iconSize: 48,
+  fontSize: 11,
+  embedCss: true,
+  externalIcons: true,
+};
+
+/**
+ * AI調整用メタデータ: ノード情報
+ */
+export interface NodeMeta {
+  id: string;
+  label?: string;
+  sublabel?: string;
+  icon?: string;
+  type?: NodeType;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  center: { x: number; y: number };
+  /** 親ノードID（子ノードの場合） */
+  parentId?: string;
+}
+
+/**
+ * AI調整用メタデータ: 接続情報
+ */
+export interface ConnectionMeta {
+  from: string;
+  to: string;
+  fromSide?: AnchorSide;
+  toSide?: AnchorSide;
+  color?: string;
+  type?: ConnectionType;
+}
+
+/**
+ * AI調整用メタデータ: レイアウト情報
+ */
+export interface LayoutMeta {
+  rows: Array<{ y: number; nodes: string[] }>;
+  columns: Array<{ x: number; nodes: string[] }>;
+}
+
+/**
+ * AI調整用メタデータ: 全体
+ * HTMLに埋め込まれ、AIがダイアグラムを理解・調整するために使用
+ */
+export interface DiagramMeta {
+  version: string;
+  title?: string;
+  subtitle?: string;
+  canvas: {
+    width: number;
+    height: number;
+    gridSize: number;
+  };
+  nodes: NodeMeta[];
+  connections: ConnectionMeta[];
+  layout: LayoutMeta;
+  sourceFile?: string;
+  /** 元のダイアグラム定義（再構築用） */
+  source?: DiagramDefinition & { render?: { width?: number; height?: number } };
+}
